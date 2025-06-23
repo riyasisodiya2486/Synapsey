@@ -13,7 +13,7 @@ export function Sidebar(){
         <div className="mr-3">
           <Logo />
         </div>
-        Brainly
+        Synapsey
       </div>
       
       {/* Items  */}
