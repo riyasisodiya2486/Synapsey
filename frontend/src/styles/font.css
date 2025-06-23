@@ -1,0 +1,13 @@
+@font-face {
+  font-family: 'Neue Haas';
+  src: url('../assets/fonts/NeueHaasDisplayLight.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Neue Haas';
+  src: url('../assets/fonts/NeueHaasDisplayXThin.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+}
