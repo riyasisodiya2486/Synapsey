@@ -37,7 +37,6 @@ exports.LinkModel = exports.ContentModel = exports.UserModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 require("dotenv").config();
 const MONGO_URI = process.env.MONGO_URI;
-console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
 if (!MONGO_URI) {
     console.error("❌ MONGO_URI is undefined. Check your .env file.");
     process.exit(1);

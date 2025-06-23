@@ -16,10 +16,18 @@ const express_1 = __importDefault(require("express"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = require("./db");
 const zod_1 = require("./zod");
-const config_1 = require("./config");
 const middleware_1 = require("./middleware");
 const utils_1 = require("./utils");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+const JWT_PASSWORD = process.env.JWT_PASSWORD;
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+if (!JWT_PASSWORD) {
+    console.error("❌ JWT_PASSWORD is undefined. Check your .env file.");
+    process.exit(1);
+}
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
@@ -33,9 +41,10 @@ app.post('/api/v1/signup', (req, res) => __awaiter(void 0, void 0, void 0, funct
         });
     }
     try {
+        const hashedPassword = yield bcrypt_1.default.hash(password, 10);
         yield db_1.UserModel.create({
             username: username,
-            password: password
+            password: hashedPassword
         });
         res.json({
             msg: "User signed up"
@@ -50,19 +59,20 @@ app.post('/api/v1/signup', (req, res) => __awaiter(void 0, void 0, void 0, funct
 app.post('/api/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const username = req.body.username;
     const password = req.body.password;
-    const userExist = yield db_1.UserModel.findOne({
-        username,
-        password
-    });
-    if (userExist) {
-        const token = jsonwebtoken_1.default.sign({ id: userExist._id }, config_1.JWT_PASSWORD);
-        res.json({
-            token
-        });
+    const userExist = yield db_1.UserModel.findOne({ username });
+    if (userExist && userExist.password) {
+        const passwordMatch = yield bcrypt_1.default.compare(password, userExist.password);
+        if (!passwordMatch) {
+            res.status(403).json({
+                msg: "Incorrect password"
+            });
+        }
+        const token = jsonwebtoken_1.default.sign({ id: userExist._id }, JWT_PASSWORD, { expiresIn: "1h" });
+        res.json({ token });
     }
     else {
         res.status(403).json({
-            msg: "user doesnt exist"
+            msg: "User doesn't exist"
         });
     }
 }));
@@ -165,4 +175,6 @@ app.get('/api/v1/brain/:shareLink', (req, res) => __awaiter(void 0, void 0, void
         content: content
     });
 }));
-app.listen(3000);
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost: ${PORT}`);
+});
